@@ -24,7 +24,7 @@ executable agar-hs
                      , bytestring >=0.10.4.0
                      , binary >=0.7.4.0
                      , data-binary-ieee754 >=0.4.4
-                     , text >= text-1.2.0.4
+                     , text >=1.2.0.4
 
   hs-source-dirs:      src
   

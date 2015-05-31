@@ -7,9 +7,10 @@ module Models ( Position
 
 import Data.ByteString.Lazy (ByteString, empty, append)
 import Data.Text.Lazy (Text)
-import Data.Text.Lazy.Encoding (encodeUtf32LE)
+import Data.Text.Lazy.Encoding (encodeUtf16LE)
 import Data.ByteString.Builder hiding (drop)
 import Data.Word (Word32)
+import Data.Monoid
 
 type Position = (Float, Float)
 
@@ -25,10 +26,20 @@ data Player = Player { plId :: String
                      , plPosition :: Position
                      , plActive :: Bool }
 
--- Id, Name
+-- | Id, Name
 type Leaderboard = [(Word32, Text)]
 
 serializeLeaderboard :: Leaderboard -> ByteString
-serializeLeaderboard lb = foldr append empty ser
-  where ser = map (\(_id, text) ->
-                    append (toLazyByteString (word32LE _id)) (encodeUtf32LE text)) lb
+serializeLeaderboard leaderboard = toLazyByteString $
+                                   prefix <>
+                                   word32LE target <>
+                                   lazyByteString (foldr append empty serialized)
+  where serialized = map serialize leaderboard
+        serialize (_id, text) = toLazyByteString $
+                                word32LE _id <>
+                                lazyByteString (encodeUtf16LE text) <>
+                                endText
+
+        target = fromIntegral (length leaderboard - 1) :: Word32
+        prefix = word8 49
+        endText = word16LE 0
