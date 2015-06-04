@@ -5,7 +5,7 @@ import Models
 import Data.ByteString.Lazy ( ByteString, take, drop, length
                             , isSuffixOf, isPrefixOf)
 import Prelude hiding (take, drop, length)
-import Data.ByteString.Builder hiding (drop)
+import Data.ByteString.Builder
 import Data.Monoid ((<>))
 import Data.Text.Lazy.Encoding (decodeUtf16LE)
 import Data.Text.Lazy (Text)
