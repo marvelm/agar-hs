@@ -17,7 +17,13 @@ destroyPoints points = toLazyByteString $
                        word16LE numPoints
   where numPoints = fromIntegral (length points)
 
+-- | 'moveCells' transforms an MArray of Cell
+-- It should be passed into 'runST' to get an MArray of Cell
 moveCells cells = do
+  {- REVIEW
+- Is returning an Array is necessary? This function should mutate 'cells' and the caller should be able to continue using the array that was passed in.
+  -}
+
   (start, stop) <- getBounds cells
   let ixes = [start .. stop]
   forM_ ixes $ \i -> do
@@ -55,14 +61,16 @@ moveCells cells = do
       x1 = x + (speed' * sin angle)
       y1 = y + (speed' * cos angle)
       in
+
      forM_ ixes $ \j -> do
        otherCell <- readArray cells j
        let
+         notRecombining = not . isRecombining
          otherCell'
-           | cId otherCell == cId cell = cell
+           | cId otherCell == cId cell = cell -- Do nothing if 'otherCell' is the same
            | cIgnoreCollision cell = otherCell
 
-           | (not (cIsRecombining otherCell) || not (cIsRecombining cell)) &&
+           | (notRecombining otherCell) || (notRecombining cell) &&
              dist < collisionDist &&
              not collisionCheck =
                otherCell { cPos = position }
@@ -101,5 +109,5 @@ moveCells cells = do
 
          cell' = cell { cPos = Position { pX = truncate x1', pY= truncate y1' } }
          in
-        writeArray cells i otherCell'
+        writeArray cells j otherCell'
   return cells
