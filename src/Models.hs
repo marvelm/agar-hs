@@ -24,6 +24,18 @@ data GameServer = GameServer { gsConnections :: [WS.Connection]
 data Position = Position { pX :: Int
                          , pY :: Int } deriving Eq
 
+{-
+class Cell c where
+  cId :: c -> Int
+  cPos :: c -> Position
+  cMouse :: c -> Position
+  cMass :: c -> Int
+  cType :: c -> Int
+  cAngle :: c -> Float
+  cIgnoreCollision :: c -> Bool
+  cIsRecombining :: c -> Bool
+-}
+
 data Cell = Cell { cId :: Int
                  , cPos :: Position
                  , cMouse :: Position
@@ -32,9 +44,10 @@ data Cell = Cell { cId :: Int
                  , cAngle :: Float
                  , cIgnoreCollision :: Bool
                  , cIsRecombining :: Bool
-                 } deriving Eq
+                 }
 
---
+instance Eq Cell where
+  a == b = (cId a) == (cId b)
 
 cSize :: Cell -> Int
 cSize cell = truncate $ sqrt ((100 * fromIntegral(cMass cell)) + 0.25)

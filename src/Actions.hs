@@ -20,8 +20,10 @@ destroyPoints points = toLazyByteString $
 -- | 'moveCells' transforms an MArray of Cell
 -- It should be passed into 'runST' to get an MArray of Cell
 moveCells cells = do
+
   {- REVIEW
-- Is returning an Array is necessary? This function should mutate 'cells' and the caller should be able to continue using the array that was passed in.
+- Is returning an Array is necessary?
+    This function should mutate 'cells' and the caller should be able to continue using the array that was passed in.
   -}
 
   (start, stop) <- getBounds cells
@@ -65,9 +67,9 @@ moveCells cells = do
      forM_ ixes $ \j -> do
        otherCell <- readArray cells j
        let
-         notRecombining = not . isRecombining
+         notRecombining = not . cIsRecombining
          otherCell'
-           | cId otherCell == cId cell = cell -- Do nothing if 'otherCell' is the same
+           | otherCell == cell = cell -- Do nothing if 'otherCell' is the same
            | cIgnoreCollision cell = otherCell
 
            | (notRecombining otherCell) || (notRecombining cell) &&
