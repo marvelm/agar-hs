@@ -25,9 +25,9 @@ application gs pending = do
   parseMessage conn =<< WS.receiveDataMessage conn
 
 azor :: (a -> [a] -> [a]) -> [a] -> [a]
-azor f elements = foldl' xs elements [0..length elements]
+azor f elements = foldl' xs elements [0 .. length elements]
   where
-    xs elems i   = foldl' (`go` i) elems [0..length elems]
+    xs elems i = foldl' (`go` i) elems [0 .. length elems]
     go elems i _ = f (elems !! i) elems
 
 main = do

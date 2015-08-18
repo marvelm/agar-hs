@@ -1,2 +1,6 @@
 dist
 main_out.js
+.cabal-sandbox
+.stack-work
+LICENSE
+cabal.sandbox.config

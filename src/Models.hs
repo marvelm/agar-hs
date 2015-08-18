@@ -1,8 +1,4 @@
-module Models ( GameServer (..)
-              , Position (..)
-              , Cell (..)
-              , cSize
-              ) where
+module Models (GameServer(..), Position(..), Cell(..), cSize) where
 
 import Data.ByteString.Lazy (ByteString, empty, append)
 import Data.Text.Lazy (Text)
@@ -17,78 +13,74 @@ import Control.Monad.ST
 import qualified Network.WebSockets as WS
 import Prelude
 
-data GameServer = GameServer { gsConnections :: [WS.Connection]
-                             , gsCells :: [Cell]
-                             }
+data GameServer = GameServer
+    { gsConnections :: [WS.Connection]
+    , gsCells :: [Cell]
+    }
 
-data Position = Position { pX :: Int
-                         , pY :: Int } deriving Eq
+data Position = Position
+    { pX :: Int
+    , pY :: Int
+    } deriving (Eq)
 
-{-
-class Cell c where
-  cId :: c -> Int
-  cPos :: c -> Position
-  cMouse :: c -> Position
-  cMass :: c -> Int
-  cType :: c -> Int
-  cAngle :: c -> Float
-  cIgnoreCollision :: c -> Bool
-  cIsRecombining :: c -> Bool
--}
-
-data Cell = Cell { cId :: Int
-                 , cPos :: Position
-                 , cMouse :: Position
-                 , cMass :: Int
-                 , cType :: Int
-                 , cAngle :: Float
-                 , cIgnoreCollision :: Bool
-                 , cIsRecombining :: Bool
-                 }
+data Cell = Cell
+    { cId :: Int
+    , cPos :: Position
+    , cMouse :: Position
+    , cMass :: Int
+    , cType :: Int
+    , cAngle :: Float
+    , cIgnoreCollision :: Bool
+    , cIsRecombining :: Bool
+    }
 
 instance Eq Cell where
-  a == b = (cId a) == (cId b)
+    a == b = (cId a) == (cId b)
 
 cSize :: Cell -> Int
-cSize cell = truncate $ sqrt ((100 * fromIntegral(cMass cell)) + 0.25)
+cSize cell = truncate $ sqrt ((100 * fromIntegral (cMass cell)) + 0.25)
+
+class Model a  where
+    serialize :: a -> ByteString
 
 -- TODO Add player IP
-data Player = Player { plId :: String
-                     , plNickname :: String
-                     , plScore :: Int
-                     , plMass :: Int
-                     , plActive :: Bool
-                     }
+data Player = Player
+    { plId :: String
+    , plNickname :: String
+    , plScore :: Int
+    , plMass :: Int
+    , plActive :: Bool
+    }
 
-data Canvas = Canvas { cLeft :: Float
-                     , cBottom :: Float
-                     , cRight :: Float
-                     , cTop :: Float
-                     }
+data Canvas = Canvas
+    { cLeft :: Float
+    , cBottom :: Float
+    , cRight :: Float
+    , cTop :: Float
+    }
 
-serializeCanvas :: Canvas -> ByteString
-serializeCanvas canvas = toLazyByteString $
-                         prefix <>
-                         floatLE (cLeft canvas) <>
-                         floatLE (cBottom canvas) <>
-                         floatLE (cRight canvas) <>
-                         floatLE (cTop canvas)
-  where prefix = word8 64
+instance Model Canvas where
+    serialize canvas =
+        toLazyByteString $
+        prefix <> floatLE (cLeft canvas) <> floatLE (cBottom canvas) <>
+        floatLE (cRight canvas) <>
+        floatLE (cTop canvas)
+      where
+        prefix = word8 64
 
 -- | Id, Name
 type Leaderboard = [(Word32, Text)]
 
-serializeLeaderboard :: Leaderboard -> ByteString
-serializeLeaderboard leaderboard = toLazyByteString $
-                                   prefix <>
-                                   word32LE target <>
-                                   lazyByteString (foldr append empty serialized)
-  where serialized = map serialize leaderboard
-        serialize (_id, text) = toLazyByteString $
-                                word32LE _id <>
-                                lazyByteString (encodeUtf16LE text) <>
-                                endText
-
+instance Model Leaderboard where
+    serialize leaderboard =
+        toLazyByteString $
+        prefix <> word32LE target <>
+        lazyByteString (foldr append empty serialized)
+      where
+        serialized = map _serialize leaderboard
+        _serialize (_id,text) =
+            toLazyByteString $
+            word32LE _id <> lazyByteString (encodeUtf16LE text) <> endText
         target = fromIntegral (length leaderboard - 1) :: Word32
         prefix = word8 49
         endText = word16LE 0

@@ -30,8 +30,8 @@ ejectMass :: ByteString
 ejectMass = toLazyByteString $
             word8 21
 
-isName :: ByteString -> Bool
-isName bs = namePrefix `isPrefixOf` bs
+isSetName :: ByteString -> Bool
+isSetName bs = namePrefix `isPrefixOf` bs
   where namePrefix = toLazyByteString $ word8 0
 
 parseName :: ByteString -> Maybe Text
@@ -39,24 +39,26 @@ parseName bs | isName bs = Just $ decodeUtf16LE $ drop 1 bs
 parseName _ = Nothing
 
 isLocation :: ByteString -> Bool
-isLocation bs = (locationPrefix `isPrefixOf` bs) &&
-                (locationSuffix `isSuffixOf` bs)
-  where locationPrefix = toLazyByteString $ word8 16
-        locationSuffix = toLazyByteString $ floatLE 0
+isLocation bs =
+    (locationPrefix `isPrefixOf` bs) && (locationSuffix `isSuffixOf` bs)
+  where
+    locationPrefix = toLazyByteString $ word8 16
+    locationSuffix = toLazyByteString $ floatLE 0
 
 parseLocation :: Get (Double, Double)
 parseLocation = do
-  prefix <- getWord8
-  xPos <- getFloat64le
-  yPos <- getFloat64le
-  suffix <- getWord32le
-  if (prefix == locPrefix) && (suffix == locSuffix)
-     then return (xPos, yPos)
-     else fail "bad"
-  where locPrefix = 16
-        locSuffix = 0
+    prefix <- getWord8
+    xPos <- getFloat64le
+    yPos <- getFloat64le
+    suffix <- getWord32le
+    if (prefix == locPrefix) && (suffix == locSuffix)
+        then return (xPos, yPos)
+        else fail "bad"
+  where
+    locPrefix = 16
+    locSuffix = 0
 
-parseMessage :: WS.Connection -> WS.DataMessage -> IO ()
+parseMessage :: WS.Connection -> GameServer -> WS.DataMessage -> IO ()
 parseMessage conn (WS.Text t)
   | t == "Ping" =
     WS.sendDataMessage conn $ WS.Text "Pong"
@@ -89,7 +91,7 @@ parseMessage _ (WS.Binary b)
 
 -- TODO Fix this
 parseMessage _ (WS.Binary b)
-  | isName b =
+  | isSetName b =
       case parseName b of
        Just name ->
          print name
