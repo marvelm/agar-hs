@@ -2,8 +2,8 @@
 module Parse (parseMessage) where
 
 import Models
-import Data.ByteString.Lazy ( ByteString, take, drop, length
-                            , isSuffixOf, isPrefixOf)
+import Data.ByteString.Lazy
+       (ByteString, take, drop, length, isSuffixOf, isPrefixOf)
 import Prelude hiding (take, drop, length)
 import Data.ByteString.Builder
 import Data.Monoid ((<>))
@@ -35,7 +35,7 @@ isSetName bs = namePrefix `isPrefixOf` bs
   where namePrefix = toLazyByteString $ word8 0
 
 parseName :: ByteString -> Maybe Text
-parseName bs | isName bs = Just $ decodeUtf16LE $ drop 1 bs
+parseName bs | isSetName bs = Just $ decodeUtf16LE $ drop 1 bs
 parseName _ = Nothing
 
 isLocation :: ByteString -> Bool
@@ -58,7 +58,7 @@ parseLocation = do
     locPrefix = 16
     locSuffix = 0
 
-parseMessage :: WS.Connection -> GameServer -> WS.DataMessage -> IO ()
+parseMessage :: WS.Connection -> WS.DataMessage -> IO ()
 parseMessage conn (WS.Text t)
   | t == "Ping" =
     WS.sendDataMessage conn $ WS.Text "Pong"

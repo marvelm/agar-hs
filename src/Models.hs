@@ -1,4 +1,5 @@
-module Models (GameServer(..), Position(..), Cell(..), cSize) where
+{-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
+module Models (Model, GameServer(..), Position(..), Cell(..), cSize) where
 
 import Data.ByteString.Lazy (ByteString, empty, append)
 import Data.Text.Lazy (Text)

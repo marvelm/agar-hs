@@ -1,6 +1,4 @@
-module Actions ( destroyPoints
-               , moveCells
-               ) where
+module Actions (destroyPoints, moveCells) where
 
 import Data.Word
 import Data.ByteString.Lazy (ByteString)
@@ -63,7 +61,6 @@ moveCells cells = do
       x1 = x + (speed' * sin angle)
       y1 = y + (speed' * cos angle)
       in
-
      forM_ ixes $ \j -> do
        otherCell <- readArray cells j
        let
