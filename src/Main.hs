@@ -62,8 +62,9 @@ main = do
     gs' <- readTVarIO gs
     let cells = gsCells gs'
     let canvas = gsCanvas gs'
+
     let printCell out cell =
-          out ++ "X"
+          out ++ show (cMass cell)
 
     putStrLn $ foldl' printCell "" cells
 
