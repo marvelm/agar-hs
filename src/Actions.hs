@@ -18,12 +18,10 @@ destroyPoints points = toLazyByteString $
 -- | 'moveCells' transforms an MArray of Cell
 -- It should be passed into 'runST' to get an MArray of Cell
 moveCells cells = do
-
   {- REVIEW
 - Is returning an Array is necessary?
     This function should mutate 'cells' and the caller should be able to continue using the array that was passed in.
   -}
-
   (start, stop) <- getBounds cells
   let ixes = [start .. stop]
   forM_ ixes $ \i -> do

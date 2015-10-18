@@ -1,5 +1,5 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
-module Models (Model, GameServer(..), Position(..), Cell(..), cSize) where
+module Models (Model, GameServer(..), Position(..), Cell(..), cSize, Canvas(..)) where
 
 import Data.ByteString.Lazy (ByteString, empty, append)
 import Data.Text.Lazy (Text)
@@ -17,6 +17,7 @@ import Prelude
 data GameServer = GameServer
     { gsConnections :: [WS.Connection]
     , gsCells :: [Cell]
+    , gsCanvas :: Canvas
     }
 
 data Position = Position
@@ -41,7 +42,7 @@ instance Eq Cell where
 cSize :: Cell -> Int
 cSize cell = truncate $ sqrt ((100 * fromIntegral (cMass cell)) + 0.25)
 
-class Model a  where
+class Model a where
     serialize :: a -> ByteString
 
 -- TODO Add player IP
